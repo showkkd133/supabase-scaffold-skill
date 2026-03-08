@@ -1,0 +1,21 @@
+{
+  "name": "supabase-scaffold",
+  "version": "1.0.0",
+  "description": "Generate Supabase migration + RLS + TypeScript types + Next.js API routes from natural language data model descriptions",
+  "author": "showkkd133",
+  "license": "MIT",
+  "skills": [
+    {
+      "name": "supabase-scaffold",
+      "path": "skills/supabase-scaffold/SKILL.md",
+      "triggers": [
+        "supabase scaffold",
+        "supabase 脚手架",
+        "生成数据模型",
+        "新建 supabase 表",
+        "supabase migration",
+        "supabase RLS"
+      ]
+    }
+  ]
+}

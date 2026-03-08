@@ -1,0 +1,29 @@
+{
+  "name": "supabase-scaffold",
+  "display_name": "Supabase Scaffold",
+  "description": "Full-stack Supabase project scaffolding from natural language data model descriptions. Generates SQL migrations with RLS, TypeScript types, Next.js API routes, Zod schemas, Auth config, and React form components.",
+  "author": "showkkd133",
+  "repository": "https://github.com/showkkd133/supabase-scaffold-skill",
+  "version": "1.0.0",
+  "license": "MIT",
+  "categories": [
+    "developer-tools",
+    "code-generation",
+    "database",
+    "full-stack"
+  ],
+  "tags": [
+    "claude-code",
+    "claude-skill",
+    "skill-md",
+    "supabase",
+    "nextjs",
+    "postgresql",
+    "rls",
+    "typescript",
+    "zod",
+    "scaffolding"
+  ],
+  "language": "zh-CN",
+  "min_claude_version": "1.0.0"
+}
