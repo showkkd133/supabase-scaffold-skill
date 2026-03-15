@@ -1,3 +1,16 @@
+---
+name: supabase-scaffold
+description: 从自然语言数据模型描述生成 Supabase 全栈项目代码（migration、RLS、API、hooks）
+triggers:
+  - "supabase scaffold"
+  - "supabase 脚手架"
+  - "生成数据模型"
+  - "新建 supabase 表"
+  - "supabase migration"
+  - "supabase RLS"
+  - "supabase 项目初始化"
+---
+
 # Supabase 全栈项目脚手架生成器
 
 ## 触发条件
@@ -618,6 +631,15 @@ type Params = { params: Promise<{ id: string }> }
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
+
+    // Validate UUID format
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid ID format' },
+        { status: 400 }
+      )
+    }
+
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -655,6 +677,15 @@ export async function GET(request: NextRequest, { params }: Params) {
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
+
+    // Validate UUID format
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid ID format' },
+        { status: 400 }
+      )
+    }
+
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -710,6 +741,15 @@ export async function PUT(request: NextRequest, { params }: Params) {
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
+
+    // Validate UUID format
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid ID format' },
+        { status: 400 }
+      )
+    }
+
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -720,19 +760,27 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       )
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('<table_name>')
       .delete()
       .eq('id', id)
+      .select()
+      .single()
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { success: false, error: 'Resource not found' },
+          { status: 404 }
+        )
+      }
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 400 }
       )
     }
 
-    return NextResponse.json({ success: true }, { status: 200 })
+    return NextResponse.json({ success: true, data }, { status: 200 })
   } catch (error) {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
@@ -1099,7 +1147,7 @@ export function <Entity>Form({
 // src/hooks/use-realtime.ts
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
@@ -1109,6 +1157,16 @@ export function useRealtime<T extends Record<string, unknown>>(
   onUpdate?: (payload: T) => void,
   onDelete?: (payload: { id: string }) => void
 ) {
+  const onInsertRef = useRef(onInsert)
+  const onUpdateRef = useRef(onUpdate)
+  const onDeleteRef = useRef(onDelete)
+
+  useEffect(() => {
+    onInsertRef.current = onInsert
+    onUpdateRef.current = onUpdate
+    onDeleteRef.current = onDelete
+  })
+
   useEffect(() => {
     const supabase = createClient()
     const channel: RealtimeChannel = supabase
@@ -1116,24 +1174,24 @@ export function useRealtime<T extends Record<string, unknown>>(
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table },
-        (payload) => onInsert?.(payload.new as T)
+        (payload) => onInsertRef.current?.(payload.new as T)
       )
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table },
-        (payload) => onUpdate?.(payload.new as T)
+        (payload) => onUpdateRef.current?.(payload.new as T)
       )
       .on(
         'postgres_changes',
         { event: 'DELETE', schema: 'public', table },
-        (payload) => onDelete?.(payload.old as { id: string })
+        (payload) => onDeleteRef.current?.(payload.old as { id: string })
       )
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [table, onInsert, onUpdate, onDelete])
+  }, [table])
 }
 ```
 

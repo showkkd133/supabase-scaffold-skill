@@ -14,7 +14,8 @@
         "生成数据模型",
         "新建 supabase 表",
         "supabase migration",
-        "supabase RLS"
+        "supabase RLS",
+        "supabase 项目初始化"
       ]
     }
   ]
